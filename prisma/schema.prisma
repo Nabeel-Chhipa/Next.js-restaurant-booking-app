@@ -33,6 +33,7 @@ model Item {
   id Int @id @default(autoincrement())
   name String
   price String
+  description String
   restaurant_id Int
   restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
   created_at DateTime @default(now())
