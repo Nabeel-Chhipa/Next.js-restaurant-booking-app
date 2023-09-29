@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client";
 import React from "react";
 import RestaurantCard from "./components/RestaurantCard";
 import RestaurantDescription from "./components/RestaurantDescription";
@@ -6,15 +7,54 @@ import RestaurantNavBar from "./components/RestaurantNavBar";
 import RestaurantRating from "./components/RestaurantRating";
 import RestaurantTitle from "./components/RestaurantTitle";
 
-const page = () => {
+const prisma = new PrismaClient()
+
+interface Props {
+  params: {
+    slug: string
+  }
+}
+
+interface RestaurantType {
+    id: number;
+    name: string;
+    images: string[];
+    description: string;
+    slug: string
+}
+
+const fetchRestaurant = async (slug: string): Promise<RestaurantType> => {
+  const restaurant = await prisma.restaurant.findUnique({
+    where: {
+      slug
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      images: true,
+      slug: true
+    }
+  })
+  if(!restaurant) {
+    throw new Error()
+  }
+  return restaurant
+}
+
+const page = async ({params}: Props) => {
+
+  const restaurant = await fetchRestaurant(params.slug)
+  console.log(restaurant)
+
   return (
     <>
       <div className="bg-white w-[70%] rounded p-3 shadow">
-        <RestaurantNavBar />
-        <RestaurantTitle />
+        <RestaurantNavBar slug={restaurant.slug}/>
+        <RestaurantTitle title={restaurant.name}/>
         <RestaurantRating />
-        <RestaurantDescription />
-        <RestaurantImage />
+        <RestaurantDescription description={restaurant.description} />
+        <RestaurantImage images={restaurant.images} />
         <div>
           <h1 className="font-bold text-3xl mt-10 mb-7 borber-b pb-5">
             What 100 people are saying
